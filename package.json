@@ -1,0 +1,16 @@
+{
+  "name": "note-generator",
+  "version": "1.0.0",
+  "description": "Note Generator Application",
+  "scripts": {
+    "install-all": "npm install && cd frontend && npm install",
+    "client": "cd frontend && npm run dev",
+    "server": "set FLASK_APP=backend/app.py && set FLASK_DEBUG=1 && python -m flask run",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
