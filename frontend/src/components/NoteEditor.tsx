@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-
 interface NoteEditorProps {
   content: string;
   onContentChange: (content: string) => void;
+  onSave: () => void; // 👈 new prop
   isSaving: boolean;
 }
 
 export default function NoteEditor({
   content,
   onContentChange,
+  onSave,
   isSaving,
 }: NoteEditorProps) {
   return (
@@ -23,6 +23,15 @@ export default function NoteEditor({
           placeholder="Start writing your note here..."
           disabled={isSaving}
         />
+      </div>
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={onSave}
+          disabled={isSaving}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSaving ? 'Saving...' : 'Save'}
+        </button>
       </div>
     </div>
   );
