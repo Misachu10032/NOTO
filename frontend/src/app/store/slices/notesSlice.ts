@@ -8,11 +8,20 @@ export interface Note {
   updated_at?: string;
 }
 
+interface TempNote {
+  id: string | number;
+  keyword: string;
+  content: string;
+}
+
 interface NotesState {
   notes: Note[];
   selectedNote: Note | null;
   isLoading: boolean;
   error: string | null;
+  isEditorVisible: boolean;
+  isFollowUpMode: boolean;
+  tempNote: TempNote;
 }
 
 const initialState: NotesState = {
@@ -20,6 +29,9 @@ const initialState: NotesState = {
   selectedNote: null,
   isLoading: false,
   error: null,
+  isEditorVisible: false,
+  isFollowUpMode: false,
+  tempNote: { id: '', keyword: '', content: '' },
 };
 
 const notesSlice = createSlice({
@@ -59,6 +71,18 @@ const notesSlice = createSlice({
         state.selectedNote = null;
       }
     },
+    setEditorVisible: (state, action: PayloadAction<boolean>) => {
+      state.isEditorVisible = action.payload;
+    },
+    setFollowUpMode: (state, action: PayloadAction<boolean>) => {
+      state.isFollowUpMode = action.payload;
+    },
+    setTempNote: (state, action: PayloadAction<TempNote>) => {
+      state.tempNote = action.payload;
+    },
+    updateTempNoteContent: (state, action: PayloadAction<string>) => {
+      state.tempNote.content = action.payload;
+    },
   },
 });
 
@@ -70,6 +94,10 @@ export const {
   addNote,
   updateNote,
   deleteNote,
+  setEditorVisible,
+  setFollowUpMode,
+  setTempNote,
+  updateTempNoteContent,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

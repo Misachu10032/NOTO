@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import {
   setNotes,
@@ -9,6 +9,10 @@ import {
   addNote,
   updateNote,
   setSelectedNote,
+  setEditorVisible,
+  setFollowUpMode,
+  setTempNote,
+  updateTempNoteContent,
 } from "./store/slices/notesSlice";
 import NoteForm from "@/components/NoteForm";
 import NoteEditor from "@/components/NoteEditor";
@@ -17,20 +21,24 @@ import MarkdownViewer from "../components/MarkDownViewer";
 
 export default function Home() {
   const dispatch = useAppDispatch();
-  const { notes, selectedNote, isLoading } = useAppSelector(
-    (state) => state.notes
-  );
-  const [isEditorVisible, setIsEditorVisible] = useState(false);
-  const [tempNote, setTempNote] = useState({
-    id: "",
-    keyword: "",
-    content: "",
-  });
+  const {
+    notes,
+    selectedNote,
+    isLoading,
+    isEditorVisible,
+    isFollowUpMode,
+    tempNote
+  } = useAppSelector((state) => state.notes);
+
 
   // Fetch notes on component mount
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  useEffect(() => {
+    dispatch(setFollowUpMode(false));
+  }, [dispatch, selectedNote]);
 
   const fetchNotes = async () => {
     dispatch(setLoading(true));
@@ -71,7 +79,7 @@ export default function Home() {
       const newNote = await response.json();
       dispatch(addNote(newNote));
       dispatch(setSelectedNote(newNote));
-      setIsEditorVisible(false);
+      dispatch(setEditorVisible(false));
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred";
@@ -112,12 +120,12 @@ export default function Home() {
   // Reset editor visibility when a new note is selected
   useEffect(() => {
     if (selectedNote) {
-      setIsEditorVisible(false);
-      setTempNote({
+      dispatch(setEditorVisible(false));
+      dispatch(setTempNote({
         id: selectedNote.id,
         keyword: selectedNote.keyword,
         content: selectedNote.content,
-      });
+      }));
     }
   }, [selectedNote]);
 
@@ -144,7 +152,7 @@ export default function Home() {
                     </h2>
                     {!isEditorVisible && (
                       <button
-                        onClick={() => setIsEditorVisible(true)}
+                        onClick={() => dispatch(setEditorVisible(true))}
                         className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors flex items-center gap-1"
                       >
                         <svg
@@ -169,7 +177,7 @@ export default function Home() {
                       <h2 className="text-lg font-semibold">Editor</h2>
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => setIsEditorVisible(false)}
+                          onClick={() => dispatch(setEditorVisible(false))}
                           className="text-gray-500 hover:text-gray-700"
                           title="Close"
                         >
@@ -192,7 +200,7 @@ export default function Home() {
                       <NoteEditor
                         content={tempNote.content}
                         onContentChange={(content) =>
-                          setTempNote((prev) => ({ ...prev, content }))
+                          dispatch(updateTempNoteContent(content))
                         }
                         onSave={() => handleSaveNote(tempNote.content)}
                         isSaving={false}
