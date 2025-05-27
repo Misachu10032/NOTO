@@ -1,119 +1,17 @@
 "use client";
 
-import { useNotes } from "./hooks/useNotes";
-import NoteForm from "@/components/NoteForm";
-import NoteEditor from "@/components/NoteEditor";
-import NoteSummary from "@/components/NoteSummary";
-import MarkdownViewer from "../components/MarkDownViewer";
+import { useNotes } from "@/app/hooks/useNotes";
+import NoteLayout from "@/components/note";
+
 
 export default function Home() {
-  const {
-    notes,
-    selectedNote,
-    isLoading,
-    isEditorVisible,
-    isFollowUpMode,
-    tempNotes,
-    tempNote,
-    handleNoteGenerated,
-    handleSaveNote,
-    setEditorVisible,
-    updateTempNoteContent
-  } = useNotes();
+  const { selectedNote } = useNotes();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-center mb-8">Note Generator</h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left column - Note Form and Summary */}
-          <div className="lg:col-span-1 space-y-4">
-            <NoteForm onNoteGenerated={handleNoteGenerated} />
-            <NoteSummary />
-          </div>
-
-          {/* Right column - Note Editor/Viewer */}
-          <div className="lg:col-span-2">
-            {selectedNote ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white shadow-md rounded-lg p-4 flex flex-col">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold break-words whitespace-normal">
-                      {selectedNote.keyword}
-                    </h2>
-                    {!isEditorVisible && (
-                      <button
-                        onClick={() => setEditorVisible(true)}
-                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors flex items-center gap-1"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.793.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        Edit
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-auto">
-                    <MarkdownViewer content={tempNote.content} />
-                  </div>
-                </div>
-                {isEditorVisible ? (
-                  <div className="bg-white shadow-md rounded-lg p-4 flex flex-col">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-lg font-semibold">Editor</h2>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => setEditorVisible(false)}
-                          className="text-gray-500 hover:text-gray-700"
-                          title="Close"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-h-0">
-                      <NoteEditor
-                        content={tempNote.content}
-                        onContentChange={(content) =>
-                          updateTempNoteContent({ id: tempNote.id, content })
-                        }
-                        onSave={() => handleSaveNote(tempNote.content)}
-                        isSaving={false}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 flex items-center justify-center"></div>
-                )}
-              </div>
-            ) : (
-              <div className="bg-white shadow-md rounded-lg p-6 h-64 flex items-center justify-center">
-                <p className="text-gray-500">
-                  {isLoading
-                    ? "Loading..."
-                    : "Select a note or generate a new one"}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        <NoteLayout selectedNote={selectedNote} />
       </div>
     </div>
   );
