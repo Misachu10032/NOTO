@@ -1,140 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "./store/hooks";
-import {
-  setNotes,
-  setLoading,
-  setError,
-  addNote,
-  updateNote,
-  setSelectedNote,
-  setEditorVisible,
-  setFollowUpMode,
-  setTempNotes,
-  addTempNote,
-  updateTempNoteContent,
-  removeTempNote,
-} from "./store/slices/notesSlice";
+import { useNotes } from "./hooks/useNotes";
 import NoteForm from "@/components/NoteForm";
 import NoteEditor from "@/components/NoteEditor";
 import NoteSummary from "@/components/NoteSummary";
 import MarkdownViewer from "../components/MarkDownViewer";
 
 export default function Home() {
-  const dispatch = useAppDispatch();
   const {
     notes,
     selectedNote,
     isLoading,
     isEditorVisible,
     isFollowUpMode,
-    tempNotes
-  } = useAppSelector((state) => state.notes);
-
-  // For now, use the first tempNote in the array for editing/viewing
-  const tempNote = tempNotes.length > 0 ? tempNotes[0] : { id: '', keyword: '', content: '' };
-
-
-  // Fetch notes on component mount
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
-  useEffect(() => {
-    dispatch(setFollowUpMode(false));
-  }, [dispatch, selectedNote]);
-
-  const fetchNotes = async () => {
-    dispatch(setLoading(true));
-    try {
-      const response = await fetch("http://localhost:5000/api/notes");
-      if (!response.ok) {
-        throw new Error("Failed to fetch notes");
-      }
-      const data = await response.json();
-      dispatch(setNotes(data));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      dispatch(setError(errorMessage));
-      console.error(err);
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
-
-  const handleNoteGenerated = async (keyword: string, content: string) => {
-    try {
-      const response = await fetch("http://localhost:5000/api/notes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          keyword,
-          content,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save note");
-      }
-
-      const newNote = await response.json();
-      dispatch(addNote(newNote));
-      dispatch(setSelectedNote(newNote));
-      dispatch(setEditorVisible(false));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      dispatch(setError(errorMessage));
-      console.error(err);
-    }
-  };
-
-  const handleSaveNote = async (content: string) => {
-    if (!selectedNote) return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/notes/${selectedNote.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update note");
-      }
-
-      const updatedNote = await response.json();
-      dispatch(updateNote(updatedNote));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      dispatch(setError(errorMessage));
-      console.error(err);
-    }
-  };
-
-  // Reset editor visibility when a new note is selected
-  useEffect(() => {
-    if (selectedNote) {
-      dispatch(setEditorVisible(false));
-      dispatch(setTempNotes([
-        {
-          id: selectedNote.id,
-          keyword: selectedNote.keyword,
-          content: selectedNote.content,
-        },
-      ]));
-    }
-  }, [selectedNote]);
+    tempNotes,
+    tempNote,
+    handleNoteGenerated,
+    handleSaveNote,
+    setEditorVisible,
+    updateTempNoteContent
+  } = useNotes();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -159,7 +44,7 @@ export default function Home() {
                     </h2>
                     {!isEditorVisible && (
                       <button
-                        onClick={() => dispatch(setEditorVisible(true))}
+                        onClick={() => setEditorVisible(true)}
                         className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors flex items-center gap-1"
                       >
                         <svg
@@ -184,7 +69,7 @@ export default function Home() {
                       <h2 className="text-lg font-semibold">Editor</h2>
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => dispatch(setEditorVisible(false))}
+                          onClick={() => setEditorVisible(false)}
                           className="text-gray-500 hover:text-gray-700"
                           title="Close"
                         >
@@ -207,7 +92,7 @@ export default function Home() {
                       <NoteEditor
                         content={tempNote.content}
                         onContentChange={(content) =>
-                          dispatch(updateTempNoteContent({ id: tempNote.id, content }))
+                          updateTempNoteContent({ id: tempNote.id, content })
                         }
                         onSave={() => handleSaveNote(tempNote.content)}
                         isSaving={false}
