@@ -21,7 +21,7 @@ interface NotesState {
   error: string | null;
   isEditorVisible: boolean;
   isFollowUpMode: boolean;
-  tempNote: TempNote;
+  tempNotes: TempNote[];
 }
 
 const initialState: NotesState = {
@@ -31,7 +31,7 @@ const initialState: NotesState = {
   error: null,
   isEditorVisible: false,
   isFollowUpMode: false,
-  tempNote: { id: '', keyword: '', content: '' },
+  tempNotes: [],
 };
 
 const notesSlice = createSlice({
@@ -77,11 +77,18 @@ const notesSlice = createSlice({
     setFollowUpMode: (state, action: PayloadAction<boolean>) => {
       state.isFollowUpMode = action.payload;
     },
-    setTempNote: (state, action: PayloadAction<TempNote>) => {
-      state.tempNote = action.payload;
+    setTempNotes: (state, action: PayloadAction<TempNote[]>) => {
+      state.tempNotes = action.payload;
     },
-    updateTempNoteContent: (state, action: PayloadAction<string>) => {
-      state.tempNote.content = action.payload;
+    addTempNote: (state, action: PayloadAction<TempNote>) => {
+      state.tempNotes.push(action.payload);
+    },
+    updateTempNoteContent: (state, action: PayloadAction<{ id: string | number; content: string }>) => {
+      const note = state.tempNotes.find(n => n.id === action.payload.id);
+      if (note) note.content = action.payload.content;
+    },
+    removeTempNote: (state, action: PayloadAction<string | number>) => {
+      state.tempNotes = state.tempNotes.filter(n => n.id !== action.payload);
     },
   },
 });
@@ -96,8 +103,10 @@ export const {
   deleteNote,
   setEditorVisible,
   setFollowUpMode,
-  setTempNote,
+  setTempNotes,
+  addTempNote,
   updateTempNoteContent,
+  removeTempNote,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

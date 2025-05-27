@@ -11,8 +11,10 @@ import {
   setSelectedNote,
   setEditorVisible,
   setFollowUpMode,
-  setTempNote,
+  setTempNotes,
+  addTempNote,
   updateTempNoteContent,
+  removeTempNote,
 } from "./store/slices/notesSlice";
 import NoteForm from "@/components/NoteForm";
 import NoteEditor from "@/components/NoteEditor";
@@ -27,8 +29,11 @@ export default function Home() {
     isLoading,
     isEditorVisible,
     isFollowUpMode,
-    tempNote
+    tempNotes
   } = useAppSelector((state) => state.notes);
+
+  // For now, use the first tempNote in the array for editing/viewing
+  const tempNote = tempNotes.length > 0 ? tempNotes[0] : { id: '', keyword: '', content: '' };
 
 
   // Fetch notes on component mount
@@ -121,11 +126,13 @@ export default function Home() {
   useEffect(() => {
     if (selectedNote) {
       dispatch(setEditorVisible(false));
-      dispatch(setTempNote({
-        id: selectedNote.id,
-        keyword: selectedNote.keyword,
-        content: selectedNote.content,
-      }));
+      dispatch(setTempNotes([
+        {
+          id: selectedNote.id,
+          keyword: selectedNote.keyword,
+          content: selectedNote.content,
+        },
+      ]));
     }
   }, [selectedNote]);
 
@@ -200,7 +207,7 @@ export default function Home() {
                       <NoteEditor
                         content={tempNote.content}
                         onContentChange={(content) =>
-                          dispatch(updateTempNoteContent(content))
+                          dispatch(updateTempNoteContent({ id: tempNote.id, content }))
                         }
                         onSave={() => handleSaveNote(tempNote.content)}
                         isSaving={false}
