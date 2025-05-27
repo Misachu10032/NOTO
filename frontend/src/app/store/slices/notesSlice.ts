@@ -8,7 +8,7 @@ export interface Note {
   updated_at?: string;
 }
 
-interface TempNote {
+export interface TempNote {
   id: string | number;
   keyword: string;
   content: string;

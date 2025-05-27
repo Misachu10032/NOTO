@@ -6,9 +6,37 @@ import NotePlaceholder from "@/components/note/NotePlaceholder";
 
 import FollowUpForm from "@/components/note/FollowUpForm";
 import { useNotes } from "@/app/hooks/useNotes";
+import { useEffect } from "react";
 
 export default function NoteLayout({ selectedNote }: { selectedNote: any }) {
-  const { isFollowUpMode } = useNotes();
+  const {
+    isFollowUpMode,
+    fetchNotes,
+    setEditorVisible,
+    setFollowUpMode,
+    setTempNotes,
+  } = useNotes();
+
+  useEffect(() => {
+    fetchNotes();
+    console.log("Notes fetched");
+    // eslint-disable-next-line
+  }, []);
+  useEffect(() => {
+    if (selectedNote) {
+      setEditorVisible(false);
+      setFollowUpMode(false);
+      setTempNotes([
+        {
+          id: selectedNote.id,
+          keyword: selectedNote.keyword,
+          content: selectedNote.content,
+          followupQuestions: [],
+          followupAnswers: [],
+        },
+      ]);
+    }
+  }, [selectedNote]);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left column */}

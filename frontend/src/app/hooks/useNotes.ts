@@ -12,7 +12,8 @@ import {
   setTempNotes,
   updateTempNoteContent,
   addTempNoteFollowUpQuestion,
-  addTempNoteFollowUpAnswer
+  addTempNoteFollowUpAnswer,
+  TempNote
 
 } from "../store/slices/notesSlice";
 
@@ -25,14 +26,8 @@ export function useNotes() {
   const tempNote = tempNotes.length > 0 ? tempNotes[0] : { id: '', keyword: '', content: '' };
 
   // Fetch notes on mount
-  useEffect(() => {
-    fetchNotes();
-    // eslint-disable-next-line
-  }, []);
 
-  useEffect(() => {
-    dispatch(setFollowUpMode(false));
-  }, [dispatch, selectedNote]);
+
 
   const fetchNotes = async () => {
     dispatch(setLoading(true));
@@ -91,20 +86,7 @@ export function useNotes() {
   };
 
   // Reset editor visibility when a new note is selected
-  useEffect(() => {
-    if (selectedNote) {
-      dispatch(setEditorVisible(false));
-      dispatch(setTempNotes([
-        {
-          id: selectedNote.id,
-          keyword: selectedNote.keyword,
-          content: selectedNote.content,
-          followupQuestions: [],
-          followupAnswers: [],
-        },
-      ]));
-    }
-  }, [selectedNote, dispatch]);
+
 
  
 
@@ -120,11 +102,12 @@ export function useNotes() {
     fetchNotes,
     handleNoteGenerated,
     handleSaveNote,
+    setTempNotes : (notes: TempNote[] | any ) => dispatch(setTempNotes(notes)),
     setSelectedNote: (note: any) => dispatch(setSelectedNote(note)),
     setEditorVisible: (visible: boolean) => dispatch(setEditorVisible(visible)),
     updateTempNoteContent: (payload: any) => dispatch(updateTempNoteContent(payload)),
     setFollowUpMode : (val: boolean) => dispatch(setFollowUpMode(val)),
-    addTempNoteFollowUpQuestion: (payload: any) => dispatch(addTempNoteFollowUpQuestion(payload)),
-    addTempNoteFollowUpAnswer: (payload: any) => dispatch(addTempNoteFollowUpAnswer(payload)),
+    addTempNoteFollowUpQuestion: (payload: { id: string | number; followupQuestion: string }) => dispatch(addTempNoteFollowUpQuestion(payload)),
+    addTempNoteFollowUpAnswer: (payload: { id: string | number; followupAnswer: string }) => dispatch(addTempNoteFollowUpAnswer(payload)),
   };
 }
