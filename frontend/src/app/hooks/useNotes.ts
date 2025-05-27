@@ -10,7 +10,10 @@ import {
   setEditorVisible,
   setFollowUpMode,
   setTempNotes,
-  updateTempNoteContent
+  updateTempNoteContent,
+  addTempNoteFollowUpQuestion,
+  addTempNoteFollowUpAnswer
+
 } from "../store/slices/notesSlice";
 
 export function useNotes() {
@@ -96,10 +99,15 @@ export function useNotes() {
           id: selectedNote.id,
           keyword: selectedNote.keyword,
           content: selectedNote.content,
+          followupQuestions: [],
+          followupAnswers: [],
         },
       ]));
     }
   }, [selectedNote, dispatch]);
+
+ 
+
 
   return {
     notes,
@@ -115,5 +123,8 @@ export function useNotes() {
     setSelectedNote: (note: any) => dispatch(setSelectedNote(note)),
     setEditorVisible: (visible: boolean) => dispatch(setEditorVisible(visible)),
     updateTempNoteContent: (payload: any) => dispatch(updateTempNoteContent(payload)),
+    setFollowUpMode : (val: boolean) => dispatch(setFollowUpMode(val)),
+    addTempNoteFollowUpQuestion: (payload: any) => dispatch(addTempNoteFollowUpQuestion(payload)),
+    addTempNoteFollowUpAnswer: (payload: any) => dispatch(addTempNoteFollowUpAnswer(payload)),
   };
 }

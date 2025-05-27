@@ -12,6 +12,8 @@ interface TempNote {
   id: string | number;
   keyword: string;
   content: string;
+  followupQuestions: string[];
+  followupAnswers: string[];
 }
 
 interface NotesState {
@@ -31,7 +33,7 @@ const initialState: NotesState = {
   error: null,
   isEditorVisible: false,
   isFollowUpMode: false,
-  tempNotes: [],
+  tempNotes: [], // New tempNotes should include followupQuestions/Answers when created
 };
 
 const notesSlice = createSlice({
@@ -87,6 +89,24 @@ const notesSlice = createSlice({
       const note = state.tempNotes.find(n => n.id === action.payload.id);
       if (note) note.content = action.payload.content;
     },
+    addTempNoteFollowUpQuestion: (
+      state,
+      action: PayloadAction<{ id: string | number; followupQuestion: string }>
+    ) => {
+      const note = state.tempNotes.find(n => n.id === action.payload.id);
+      if (note) {
+        note.followupQuestions.push(action.payload.followupQuestion);
+      }
+    },
+    addTempNoteFollowUpAnswer: (
+      state,
+      action: PayloadAction<{ id: string | number; followupAnswer: string }>
+    ) => {
+      const note = state.tempNotes.find(n => n.id === action.payload.id);
+      if (note) {
+        note.followupAnswers.push(action.payload.followupAnswer);
+      }
+    },
     removeTempNote: (state, action: PayloadAction<string | number>) => {
       state.tempNotes = state.tempNotes.filter(n => n.id !== action.payload);
     },
@@ -107,6 +127,8 @@ export const {
   addTempNote,
   updateTempNoteContent,
   removeTempNote,
+  addTempNoteFollowUpQuestion,
+  addTempNoteFollowUpAnswer,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
