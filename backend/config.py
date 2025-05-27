@@ -15,3 +15,5 @@ OPENAI_MODEL = "gpt-3.5-turbo"
 
 # Database configuration
 NOTES_FILE = "notes.json"
+
+POSTGRES_URI = os.getenv("POSTGRES_URI")
