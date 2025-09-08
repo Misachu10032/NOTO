@@ -1,20 +1,22 @@
 // components/note/index.tsx
-import NoteForm from "@/components/note/NoteForm";
-import NoteSummary from "@/components/note/NoteSummary";
-import NoteViewerPanel from "@/components/note/NoteViewerPanel";
-import NotePlaceholder from "@/components/note/NotePlaceholder";
+import NoteForm from "@/components/Note/NoteForm";
+import NoteSummary from "@/components/Note/NoteSummary";
+import NoteViewerPanel from "@/components/Note/NoteViewerPanel";
+import NotePlaceholder from "@/components/Note/NotePlaceholder";
 
-import FollowUpForm from "@/components/note/FollowUpForm";
+import FollowUpForm from "@/components/Note/FollowUpForm";
 import { useNotes } from "@/app/hooks/useNotes";
 import { useEffect } from "react";
 
 export default function NoteLayout({ selectedNote }: { selectedNote: any }) {
+  
   const {
     isFollowUpMode,
     fetchNotes,
     setEditorVisible,
     setFollowUpMode,
     setTempNotes,
+    handleNoteGenerated,
   } = useNotes();
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function NoteLayout({ selectedNote }: { selectedNote: any }) {
         {isFollowUpMode ? (
           <FollowUpForm onSubmit={() => {}} isAsking={false} />
         ) : (
-          <NoteForm onNoteGenerated={() => {}} />
+          <NoteForm onNoteGenerated={handleNoteGenerated} />
         )}
         <NoteSummary />
       </div>

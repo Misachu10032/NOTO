@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNotes } from "@/app/hooks/useNotes";
-import MarkdownViewer from "@/components/note/NoteViewerPanel/MarkDownViewer";
+import MarkdownViewer from "@/components/Note/NoteViewerPanel/MarkDownViewer";
 import NoteEditorPanel from "./NoteEditorPanel";
 
 export default function NoteViewerPanel() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useNotes } from "@/app/hooks/useNotes";
-import NoteLayout from "@/components/note";
+import NoteLayout from "@/components/Note";
 
 
 export default function Home() {

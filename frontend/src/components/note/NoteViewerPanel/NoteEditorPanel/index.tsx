@@ -1,5 +1,5 @@
 import { useNotes } from "@/app/hooks/useNotes";
-import NoteEditor from "@/components/note/NoteViewerPanel/NoteEditorPanel/NoteEditor";
+import NoteEditor from "@/components/Note/NoteViewerPanel/NoteEditorPanel/NoteEditor";
 
 export default function NoteEditorPanel() {
   const {
