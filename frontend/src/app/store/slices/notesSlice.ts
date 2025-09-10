@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Note {
-  id: number;
+  id?: number;
   keyword: string;
   content: string;
   created_at: string;
@@ -44,6 +44,7 @@ const notesSlice = createSlice({
       state.notes = action.payload;
       state.isLoading = false;
       state.error = null;
+               console.log("sadsadasdaszzzzzzzzzzzzz",action.payload)
     },
     setSelectedNote: (state, action: PayloadAction<Note | null>) => {
       state.selectedNote = action.payload;
@@ -56,7 +57,9 @@ const notesSlice = createSlice({
       state.isLoading = false;
     },
     addNote: (state, action: PayloadAction<Note>) => {
+
       state.notes.unshift(action.payload);
+   
     },
     updateNote: (state, action: PayloadAction<Note>) => {
       const index = state.notes.findIndex(note => note.id === action.payload.id);

@@ -24,7 +24,7 @@ def create_note():
     if not keyword or not content:
         return jsonify({"error": "Keyword and content are required"}), 400
     
-    new_note = create_new_note(keyword, content)
+    new_note = create_new_note(keyword, content,"1")
     return jsonify(new_note), 201
 
 @notes_bp.route('/notes/<int:note_id>', methods=['PUT'])
@@ -36,7 +36,7 @@ def update_note(note_id):
     if not content:
         return jsonify({"error": "Content is required"}), 400
     
-    updated_note = update_existing_note(note_id, content)
+    updated_note = update_existing_note(note_id,"1", content)
     
     if updated_note:
         return jsonify(updated_note)

@@ -13,21 +13,24 @@ import {
   updateTempNoteContent,
   addTempNoteFollowUpQuestion,
   addTempNoteFollowUpAnswer,
-  TempNote
-
+  TempNote,
 } from "../store/slices/notesSlice";
 
 export function useNotes() {
   const dispatch = useAppDispatch();
   const {
-    notes, selectedNote, isLoading, isEditorVisible, isFollowUpMode, tempNotes
+    notes,
+    selectedNote,
+    isLoading,
+    isEditorVisible,
+    isFollowUpMode,
+    tempNotes,
   } = useAppSelector((state) => state.notes);
 
-  const tempNote = tempNotes.length > 0 ? tempNotes[0] : { id: '', keyword: '', content: '' };
+  const tempNote =
+    tempNotes.length > 0 ? tempNotes[0] : { id: "", keyword: "", content: "" };
 
   // Fetch notes on mount
-
-
 
   const fetchNotes = async () => {
     dispatch(setLoading(true));
@@ -37,7 +40,8 @@ export function useNotes() {
       const data = await response.json();
       dispatch(setNotes(data));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
       dispatch(setError(errorMessage));
       console.error(err);
     } finally {
@@ -47,18 +51,17 @@ export function useNotes() {
 
   const handleNoteGenerated = async (keyword: string, content: string) => {
     try {
-      const response = await fetch("http://localhost:5000/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword, content }),
-      });
-      if (!response.ok) throw new Error("Failed to save note");
-      const newNote = await response.json();
+      const newNote = {
+        keyword,
+        content,
+        created_at: new Date().toISOString(), // assign current timestamp
+      };
       dispatch(addNote(newNote));
       dispatch(setSelectedNote(newNote));
       dispatch(setEditorVisible(false));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
       dispatch(setError(errorMessage));
       console.error(err);
     }
@@ -79,17 +82,14 @@ export function useNotes() {
       const updatedNote = await response.json();
       dispatch(updateNote(updatedNote));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
       dispatch(setError(errorMessage));
       console.error(err);
     }
   };
 
   // Reset editor visibility when a new note is selected
-
-
- 
-
 
   return {
     notes,
@@ -102,12 +102,19 @@ export function useNotes() {
     fetchNotes,
     handleNoteGenerated,
     handleSaveNote,
-    setTempNotes : (notes: TempNote[] | any ) => dispatch(setTempNotes(notes)),
+    setTempNotes: (notes: TempNote[] | any) => dispatch(setTempNotes(notes)),
     setSelectedNote: (note: any) => dispatch(setSelectedNote(note)),
     setEditorVisible: (visible: boolean) => dispatch(setEditorVisible(visible)),
-    updateTempNoteContent: (payload: any) => dispatch(updateTempNoteContent(payload)),
-    setFollowUpMode : (val: boolean) => dispatch(setFollowUpMode(val)),
-    addTempNoteFollowUpQuestion: (payload: { id: string | number; followupQuestion: string }) => dispatch(addTempNoteFollowUpQuestion(payload)),
-    addTempNoteFollowUpAnswer: (payload: { id: string | number; followupAnswer: string }) => dispatch(addTempNoteFollowUpAnswer(payload)),
+    updateTempNoteContent: (payload: any) =>
+      dispatch(updateTempNoteContent(payload)),
+    setFollowUpMode: (val: boolean) => dispatch(setFollowUpMode(val)),
+    addTempNoteFollowUpQuestion: (payload: {
+      id: string | number;
+      followupQuestion: string;
+    }) => dispatch(addTempNoteFollowUpQuestion(payload)),
+    addTempNoteFollowUpAnswer: (payload: {
+      id: string | number;
+      followupAnswer: string;
+    }) => dispatch(addTempNoteFollowUpAnswer(payload)),
   };
 }
