@@ -14,6 +14,7 @@ import {
   addTempNoteFollowUpQuestion,
   addTempNoteFollowUpAnswer,
   TempNote,
+  addTempNote,
 } from "../store/slices/notesSlice";
 
 export function useNotes() {
@@ -54,6 +55,7 @@ export function useNotes() {
       const newNote = {
         keyword,
         content,
+        id: Date.now(), // TODO:make this better
         created_at: new Date().toISOString(), // assign current timestamp
       };
       dispatch(addNote(newNote));
@@ -99,7 +101,9 @@ export function useNotes() {
     isFollowUpMode,
     tempNotes,
     tempNote,
+    addTempNote,
     fetchNotes,
+
     handleNoteGenerated,
     handleSaveNote,
     setTempNotes: (notes: TempNote[] | any) => dispatch(setTempNotes(notes)),

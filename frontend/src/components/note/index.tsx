@@ -4,18 +4,15 @@ import NoteSummary from "@/components/Note/NoteSummary";
 import NoteViewerPanel from "@/components/Note/NoteViewerPanel";
 import NotePlaceholder from "@/components/Note/NotePlaceholder";
 
-import FollowUpForm from "@/components/Note/FollowUpForm";
 import { useNotes } from "@/app/hooks/useNotes";
 import { useEffect } from "react";
 
-export default function NoteLayout({ selectedNote }: { selectedNote: any }) {
-  
+export default function NoteLayout() {
   const {
-    isFollowUpMode,
     fetchNotes,
     setEditorVisible,
-    setFollowUpMode,
-    setTempNotes,
+    selectedNote,
+    addTempNote,
     handleNoteGenerated,
   } = useNotes();
 
@@ -27,24 +24,21 @@ export default function NoteLayout({ selectedNote }: { selectedNote: any }) {
   useEffect(() => {
     if (selectedNote) {
       setEditorVisible(false);
-      setFollowUpMode(false);
-      setTempNotes([
-        {
-          id: selectedNote.id,
-          keyword: selectedNote.keyword,
-          content: selectedNote.content,
-          followupQuestions: [],
-          followupAnswers: [],
-        },
-      ]);
+
+      // addTempNote({
+      //   id: selectedNote.id,
+      //   keyword: selectedNote.keyword,
+      //   content: selectedNote.content,
+      //   followupQuestions: [],
+      //   followupAnswers: [],
+      // });
     }
   }, [selectedNote]);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left column */}
       <div className="lg:col-span-1 space-y-4">
-    
-          <NoteForm onNoteGenerated={handleNoteGenerated} />
+        <NoteForm onNoteGenerated={handleNoteGenerated} />
 
         <NoteSummary />
       </div>

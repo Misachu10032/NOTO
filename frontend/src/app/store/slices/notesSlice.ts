@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Note {
-  id?: number;
+  id: number;
   keyword: string;
   content: string;
   created_at: string;
@@ -37,18 +37,32 @@ const initialState: NotesState = {
 };
 
 const notesSlice = createSlice({
-  name: 'notes',
+  name: "notes",
   initialState,
   reducers: {
     setNotes: (state, action: PayloadAction<Note[]>) => {
       state.notes = action.payload;
       state.isLoading = false;
       state.error = null;
-               console.log("sadsadasdaszzzzzzzzzzzzz",action.payload)
+      console.log("sadsadasdaszzzzzzzzzzzzz", action.payload);
     },
-    setSelectedNote: (state, action: PayloadAction<Note | null>) => {
-      state.selectedNote = action.payload;
+    setSelectedNote: (state, action: PayloadAction<Note>) => {
+      const note = action.payload;
+      state.selectedNote = note;
+
+      // Only add to tempNotes if not already present
+      const exists = state.tempNotes.some(
+        (t) => String(t.id) === String(note.id)
+      );
+      if (!exists) {
+        state.tempNotes.push({
+          ...note,
+          followupQuestions: [],
+          followupAnswers: [],
+        });
+      }
     },
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
@@ -57,12 +71,12 @@ const notesSlice = createSlice({
       state.isLoading = false;
     },
     addNote: (state, action: PayloadAction<Note>) => {
-
       state.notes.unshift(action.payload);
-   
     },
     updateNote: (state, action: PayloadAction<Note>) => {
-      const index = state.notes.findIndex(note => note.id === action.payload.id);
+      const index = state.notes.findIndex(
+        (note) => note.id === action.payload.id
+      );
       if (index !== -1) {
         state.notes[index] = action.payload;
       }
@@ -71,7 +85,7 @@ const notesSlice = createSlice({
       }
     },
     deleteNote: (state, action: PayloadAction<number>) => {
-      state.notes = state.notes.filter(note => note.id !== action.payload);
+      state.notes = state.notes.filter((note) => note.id !== action.payload);
       if (state.selectedNote?.id === action.payload) {
         state.selectedNote = null;
       }
@@ -85,18 +99,22 @@ const notesSlice = createSlice({
     setTempNotes: (state, action: PayloadAction<TempNote[]>) => {
       state.tempNotes = action.payload;
     },
+
     addTempNote: (state, action: PayloadAction<TempNote>) => {
       state.tempNotes.push(action.payload);
     },
-    updateTempNoteContent: (state, action: PayloadAction<{ id: string | number; content: string }>) => {
-      const note = state.tempNotes.find(n => n.id === action.payload.id);
+    updateTempNoteContent: (
+      state,
+      action: PayloadAction<{ id: string | number; content: string }>
+    ) => {
+      const note = state.tempNotes.find((n) => n.id === action.payload.id);
       if (note) note.content = action.payload.content;
     },
     addTempNoteFollowUpQuestion: (
       state,
       action: PayloadAction<{ id: string | number; followupQuestion: string }>
     ) => {
-      const note = state.tempNotes.find(n => n.id === action.payload.id);
+      const note = state.tempNotes.find((n) => n.id === action.payload.id);
       if (note) {
         note.followupQuestions.push(action.payload.followupQuestion);
       }
@@ -105,13 +123,13 @@ const notesSlice = createSlice({
       state,
       action: PayloadAction<{ id: string | number; followupAnswer: string }>
     ) => {
-      const note = state.tempNotes.find(n => n.id === action.payload.id);
+      const note = state.tempNotes.find((n) => n.id === action.payload.id);
       if (note) {
         note.followupAnswers.push(action.payload.followupAnswer);
       }
     },
     removeTempNote: (state, action: PayloadAction<string | number>) => {
-      state.tempNotes = state.tempNotes.filter(n => n.id !== action.payload);
+      state.tempNotes = state.tempNotes.filter((n) => n.id !== action.payload);
     },
   },
 });

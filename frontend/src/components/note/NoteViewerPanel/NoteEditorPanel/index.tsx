@@ -1,9 +1,9 @@
 import { useNotes } from "@/app/hooks/useNotes";
 import NoteEditor from "@/components/Note/NoteViewerPanel/NoteEditorPanel/NoteEditor";
+import { TempNote } from "../../../../app/store/slices/notesSlice";
 
-export default function NoteEditorPanel() {
+export default function NoteEditorPanel( tempNote : TempNote) {
   const {
-    tempNote,
     setEditorVisible,
     updateTempNoteContent,
     handleSaveNote,
