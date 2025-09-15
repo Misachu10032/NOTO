@@ -15,6 +15,7 @@ import {
   addTempNoteFollowUpAnswer,
   TempNote,
   addTempNote,
+  syncNoteAfterSave,
 } from "../store/slices/notesSlice";
 
 export function useNotes() {
@@ -56,6 +57,7 @@ export function useNotes() {
         keyword,
         content,
         id: Date.now(), // TODO:make this better
+        saved: false,
         created_at: new Date().toISOString(), // assign current timestamp
       };
       dispatch(addNote(newNote));
@@ -71,18 +73,37 @@ export function useNotes() {
 
   const handleSaveNote = async (content: string) => {
     if (!selectedNote) return;
+
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/notes/${selectedNote.id}`,
-        {
-          method: "PUT",
+      let response;
+
+      if (selectedNote.saved) {
+        // 🟢 Update existing note
+        response = await fetch(
+          `http://localhost:5000/api/notes/${selectedNote.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content }),
+          }
+        );
+      } else {
+        // 🟢 Create a new note
+        response = await fetch(`http://localhost:5000/api/notes`, {
+          // removed trailing slash (optional but cleaner)
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to update note");
-      const updatedNote = await response.json();
-      dispatch(updateNote(updatedNote));
+          body: JSON.stringify({
+            keyword: selectedNote.keyword,
+            content:selectedNote.content,
+          }),
+        });
+      }
+
+      if (!response.ok) throw new Error("Failed to save note");
+      const savedNote = await response.json();
+
+      dispatch(syncNoteAfterSave({ oldId: selectedNote.id, savedNote }));
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred";

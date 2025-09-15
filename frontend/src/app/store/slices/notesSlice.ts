@@ -6,6 +6,7 @@ export interface Note {
   content: string;
   created_at: string;
   updated_at?: string;
+  saved?:boolean;
 }
 
 export interface TempNote {
@@ -24,6 +25,10 @@ interface NotesState {
   isEditorVisible: boolean;
   isFollowUpMode: boolean;
   tempNotes: TempNote[];
+}
+interface SyncNotePayload {
+  oldId: number
+  savedNote: Note,
 }
 
 const initialState: NotesState = {
@@ -131,6 +136,29 @@ const notesSlice = createSlice({
     removeTempNote: (state, action: PayloadAction<string | number>) => {
       state.tempNotes = state.tempNotes.filter((n) => n.id !== action.payload);
     },
+
+    syncNoteAfterSave: (state, action: PayloadAction<SyncNotePayload>) => {
+      const { oldId, savedNote } = action.payload;
+
+      // ✅ Update selectedNote
+      if (state.selectedNote?.id === oldId) {
+        state.selectedNote = {
+          ...state.selectedNote,
+          ...savedNote,
+          saved: true,
+        };
+      }
+
+      // ✅ Update notes array
+      state.notes = state.notes.map((note) =>
+        note.id === oldId ? { ...note, ...savedNote, saved: true } : note
+      );
+
+      // ✅ Update tempNotes array
+      state.tempNotes = state.tempNotes.map((note) =>
+        note.id === oldId ? { ...note, ...savedNote, saved: true } : note
+      );
+    },
   },
 });
 
@@ -150,6 +178,7 @@ export const {
   removeTempNote,
   addTempNoteFollowUpQuestion,
   addTempNoteFollowUpAnswer,
+  syncNoteAfterSave
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

@@ -97,6 +97,7 @@ def create_new_note(
                 "content": note[2],
                 "created_at": note[3].isoformat() if note[3] else None,
                 "updated_at": note[4].isoformat() if note[4] else None,
+                "saved": True,
                 "tags": tags or [],
             }
 
