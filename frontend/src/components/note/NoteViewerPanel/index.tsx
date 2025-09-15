@@ -17,7 +17,6 @@ export default function NoteViewerPanel() {
 
   const [followUp, setFollowUp] = useState("");
   const [isAsking, setIsAsking] = useState(false);
-  const [followUpAnswer, setFollowUpAnswer] = useState<string | null>(null);
 
   // Find the temp note for the selected note
   const tempNote = useMemo(
@@ -31,24 +30,47 @@ export default function NoteViewerPanel() {
 
   const handleAskFollowUp = async () => {
     if (!tempNote.id || !followUp.trim()) return;
-    setIsAsking(true);
-    setFollowUpAnswer(null);
 
-    // Simulate async answer
-    setTimeout(() => {
-      const answer = "(Simulated answer from AI)";
-      addTempNoteFollowUpQuestion({
-        id: tempNote.id,
-        followupQuestion: followUp,
+    setIsAsking(true);
+
+    try {
+      // Call your backend API
+      const res = await fetch("http://localhost:5000/api/ask-followup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keyword: tempNote.keyword, // ✅ Send original keyword
+          content: tempNote.content, // ✅ Send full note content
+          followupQuestions: tempNote.followupQuestions,
+          followupAnswers: tempNote.followupAnswers,
+          question: followUp,
+        }),
       });
-      addTempNoteFollowUpAnswer({
-        id: tempNote.id,
-        followupAnswer: answer,
-      });
-      setFollowUpAnswer(answer);
+
+      const data = await res.json();
+      console.log("did we get adata");
+
+      if (res.ok) {
+        // Update Redux state with new Q & A
+        addTempNoteFollowUpQuestion({
+          id: tempNote.id,
+          followupQuestion: data.question,
+        });
+        addTempNoteFollowUpAnswer({
+          id: tempNote.id,
+          followupAnswer: data.answer,
+        });
+
+        // show answer on screen
+      } else {
+        console.error("Error from API:", data.error);
+      }
+    } catch (err) {
+      console.error("Request failed:", err);
+    } finally {
       setIsAsking(false);
       setFollowUp("");
-    }, 1000);
+    }
   };
 
   const toggleFollowUpMode = () => setFollowUpMode(!isFollowUpMode);
@@ -114,32 +136,29 @@ export default function NoteViewerPanel() {
               Thinking...
             </p>
           )}
-          {followUpAnswer && (
-            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md text-sm">
-              <strong className="text-green-700">Answer:</strong>{" "}
-              {followUpAnswer}
-            </div>
-          )}
 
           {tempNote.followupQuestions?.length > 0 && (
             <div className="mt-6">
-              <h3 className="font-semibold mb-2 text-gray-700">
-                Previous Follow-ups:
-              </h3>
+              <h3 className="font-semibold mb-2 text-gray-700">Follow-ups:</h3>
               <ul className="space-y-3">
                 {tempNote.followupQuestions.map((q: string, idx: number) => (
                   <li
                     key={idx}
                     className="bg-gray-100 border border-gray-200 p-3 rounded-md text-sm"
                   >
+                    {/* Display Question */}
                     <p className="mb-1">
                       <span className="font-medium text-gray-800">Q:</span> {q}
                     </p>
+
+                    {/* Display Answer with Markdown */}
                     {(tempNote.followupAnswers || [])[idx] && (
-                      <p>
-                        <span className="font-medium text-gray-800">A:</span>{" "}
-                        {(tempNote.followupAnswers || [])[idx]}
-                      </p>
+                      <div className="mt-2">
+                        <span className="font-medium text-gray-800">A:</span>
+                        <MarkdownViewer
+                          content={(tempNote.followupAnswers || [])[idx]}
+                        />
+                      </div>
                     )}
                   </li>
                 ))}
@@ -149,7 +168,11 @@ export default function NoteViewerPanel() {
         </div>
       </div>
 
-      {isEditorVisible ? <NoteEditorPanel {...tempNote} /> : <div className="p-4" />}
+      {isEditorVisible ? (
+        <NoteEditorPanel {...tempNote} />
+      ) : (
+        <div className="p-4" />
+      )}
     </div>
   );
 }
