@@ -1,18 +1,19 @@
-// components/note/index.tsx
-import NoteForm from "@/components/Note/NoteForm";
-import NoteSummary from "@/components/Note/NoteSummary";
-import NoteViewerPanel from "@/components/Note/NoteViewerPanel";
-import NotePlaceholder from "@/components/Note/NotePlaceholder";
+"use client";
 
+import { signIn, signOut, useSession } from "next-auth/react";
+import NoteForm from "@/components/note/NoteForm";
+import NoteSummary from "@/components/note/NoteSummary";
+import NoteViewerPanel from "@/components/note/NoteViewerPanel";
+import NotePlaceholder from "@/components/note/NotePlaceholder";
 import { useNotes } from "@/app/hooks/useNotes";
 import { useEffect } from "react";
 
 export default function NoteLayout() {
+  const { data: session } = useSession();
   const {
     fetchNotes,
     setEditorVisible,
     selectedNote,
-    addTempNote,
     handleNoteGenerated,
   } = useNotes();
 
@@ -21,31 +22,42 @@ export default function NoteLayout() {
     console.log("Notes fetched");
     // eslint-disable-next-line
   }, []);
+
   useEffect(() => {
-    if (selectedNote) {
-      setEditorVisible(false);
-
-      // addTempNote({
-      //   id: selectedNote.id,
-      //   keyword: selectedNote.keyword,
-      //   content: selectedNote.content,
-      //   followupQuestions: [],
-      //   followupAnswers: [],
-      // });
-    }
+    if (selectedNote) setEditorVisible(false);
   }, [selectedNote]);
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Left column */}
-      <div className="lg:col-span-1 space-y-4">
-        <NoteForm onNoteGenerated={handleNoteGenerated} />
 
-        <NoteSummary />
+  return (
+    <div className="relative">
+      {/* Top right login/logout */}
+      <div className="absolute top-4 right-4">
+        {session ? (
+          <button
+            onClick={() => signOut()}
+            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+          >
+            Logout ({session.user?.name})
+          </button>
+        ) : (
+          <button
+            onClick={() => signIn("google")}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Login with Google
+          </button>
+        )}
       </div>
 
-      {/* Right column */}
-      <div className="lg:col-span-2">
-        {selectedNote ? <NoteViewerPanel /> : <NotePlaceholder />}
+      {/* Main content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1 space-y-4">
+          <NoteForm onNoteGenerated={handleNoteGenerated} />
+          <NoteSummary />
+        </div>
+
+        <div className="lg:col-span-2">
+          {selectedNote ? <NoteViewerPanel /> : <NotePlaceholder />}
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import os
 
 # Import routes
 from routes.notes import notes_bp
+from routes.users import users_bp
 from routes.generate import generate_bp
 from config import DEBUG, PORT, API_PREFIX
 
@@ -14,7 +15,8 @@ def create_app():
     # Register blueprints
     app.register_blueprint(notes_bp, url_prefix=API_PREFIX)
     app.register_blueprint(generate_bp, url_prefix=API_PREFIX)
-    
+
+    app.register_blueprint(users_bp, url_prefix=API_PREFIX)
     return app
 
 if __name__ == '__main__':

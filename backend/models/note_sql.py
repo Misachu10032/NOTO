@@ -151,12 +151,12 @@ def delete_note_by_id(note_id: int, user_id: int) -> bool:
         with conn.cursor() as cur:
             # Delete tags first (optional, cascade might handle this)
             cur.execute(
-                "DELETE FROM note_tags WHERE note_id=%s AND user_id=%s",
+                "DELETE FROM note_tags WHERE id=%s AND user_id=%s",
                 (note_id, user_id),
             )
             # Delete note
             cur.execute(
-                "DELETE FROM notes WHERE note_id=%s AND user_id=%s", (note_id, user_id)
+                "DELETE FROM notes WHERE id=%s AND user_id=%s", (note_id, user_id)
             )
             deleted = cur.rowcount > 0
             conn.commit()
