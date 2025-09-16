@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import NoteForm from "@/components/note/NoteForm";
 import NoteSummary from "@/components/note/NoteSummary";
 import NoteViewerPanel from "@/components/note/NoteViewerPanel";
@@ -29,25 +29,6 @@ export default function NoteLayout() {
 
   return (
     <div className="relative">
-      {/* Top right login/logout */}
-      <div className="absolute top-4 right-4">
-        {session ? (
-          <button
-            onClick={() => signOut()}
-            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-          >
-            Logout ({session.user?.name})
-          </button>
-        ) : (
-          <button
-            onClick={() => signIn("google")}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Login with Google
-          </button>
-        )}
-      </div>
-
       {/* Main content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-4">
