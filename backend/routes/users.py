@@ -6,6 +6,7 @@ users_bp = Blueprint("users", __name__)
 
 @users_bp.route("/users", methods=["POST"])
 def register_user():
+    print("--________________reguist-____________")
     """
     Create or update a user record when they log in via Google.
     Expected JSON:

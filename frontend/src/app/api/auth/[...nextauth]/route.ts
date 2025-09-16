@@ -1,32 +1,48 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+
   callbacks: {
     async signIn({ user }) {
-      // Optional: Call your Flask backend to record user
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        const res = await fetch("http://localhost:5000/api/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          }),
+          body: JSON.stringify({ email: user.email, name: user.name }),
         });
+
+        if (!res.ok) return false;
+
+        const data = await res.json();
+        user.userId = data.userId;
       } catch (err) {
         console.error("Failed to sync user to backend:", err);
+        return false;
       }
-      return true; // allow sign-in
+
+      return true;
+    },
+
+    async jwt({ token, user }) {
+      if (user?.userId) token.userId = user.userId;
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (token?.userId) session.user.userId = token.userId;
+      return session;
     },
   },
-});
 
+  session: { strategy: "jwt" },
+};
+
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

@@ -17,46 +17,32 @@ def get_db_connection():
 # -----------------------------
 # Users CRUD
 # -----------------------------
-
 def create_or_update_user(email: str, name: Optional[str] = None) -> Dict[str, Any]:
     """
     Create a new user or update existing user's name.
-    Returns the user record as a dictionary.
+    Returns the user record as a dictionary with userId.
     """
+    now = datetime.datetime.utcnow()
+
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            # Check if user exists
-            cur.execute("SELECT id FROM users WHERE email = %s", (email,))
-            existing = cur.fetchone()
-
-            if existing:
-                user_id = existing[0]
-                # Update existing user's name
-                cur.execute(
-                    """
-                    UPDATE users
-                    SET name=%s, updated_at=%s
-                    WHERE id=%s
-                    RETURNING id, email, name, created_at, updated_at
-                    """,
-                    (name, datetime.datetime.now(), user_id)
-                )
-            else:
-                # Insert new user
-                cur.execute(
-                    """
-                    INSERT INTO users (email, name, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s)
-                    RETURNING id, email, name, created_at, updated_at
-                    """,
-                    (email, name, datetime.datetime.now(), datetime.datetime.now())
-                )
+            # Insert or update in one query
+            cur.execute(
+                """
+                INSERT INTO users (email, name, created_at, updated_at)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (email)
+                DO UPDATE SET name = EXCLUDED.name, updated_at = EXCLUDED.updated_at
+                RETURNING id, email, name, created_at, updated_at
+                """,
+                (email, name, now, now),
+            )
 
             user = cur.fetchone()
             conn.commit()
 
             return {
-                "id": user[0],
+                "userId": user[0],  # matches frontend NextAuth expectation
                 "email": user[1],
                 "name": user[2],
                 "created_at": user[3].isoformat() if user[3] else None,
@@ -78,7 +64,7 @@ def get_all_users() -> List[Dict[str, Any]]:
 
             return [
                 {
-                    "id": row[0],
+                    "userId": row[0],  # <-- renamed to userId
                     "email": row[1],
                     "name": row[2],
                     "created_at": row[3].isoformat() if row[3] else None,

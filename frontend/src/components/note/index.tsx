@@ -10,22 +10,17 @@ import { useEffect } from "react";
 
 export default function NoteLayout() {
   const { data: session } = useSession();
-  const {
-    fetchNotes,
-    setEditorVisible,
-    selectedNote,
-    handleNoteGenerated,
-  } = useNotes();
+  const { fetchNotes, setEditorVisible, selectedNote, handleNoteGenerated } =
+    useNotes();
+
 
   useEffect(() => {
-    fetchNotes();
-    console.log("Notes fetched");
+    if (session?.user?.userId) {
+      fetchNotes();
+      console.log("Notes fetched");
+    }
     // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
-    if (selectedNote) setEditorVisible(false);
-  }, [selectedNote]);
+  }, [session]);
 
   return (
     <div className="relative">
