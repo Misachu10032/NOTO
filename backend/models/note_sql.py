@@ -151,13 +151,36 @@ def delete_note_by_id(note_id: int, user_id: int) -> bool:
         with conn.cursor() as cur:
             # Delete tags first (optional, cascade might handle this)
             cur.execute(
-                "DELETE FROM note_tags WHERE note_id=%s AND user_id=%s",
+                "DELETE FROM note_tags WHERE id=%s AND user_id=%s",
                 (note_id, user_id),
             )
             # Delete note
             cur.execute(
-                "DELETE FROM notes WHERE note_id=%s AND user_id=%s", (note_id, user_id)
+                "DELETE FROM notes WHERE id=%s AND user_id=%s", (note_id, user_id)
             )
             deleted = cur.rowcount > 0
             conn.commit()
             return deleted
+def get_notes_by_user(user_id: int) -> list[dict]:
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, keyword, content, created_at, updated_at
+                FROM notes
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+                """,
+                (user_id,)
+            )
+            rows = cur.fetchall()
+            return [
+                {
+                    "id": row[0],
+                    "keyword": row[1],
+                    "content": row[2],
+                    "created_at": row[3].isoformat() if row[3] else None,
+                    "updated_at": row[4].isoformat() if row[4] else None,
+                }
+                for row in rows
+            ]
