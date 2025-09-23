@@ -7,7 +7,7 @@ export interface Note {
   created_at: string;
   updated_at?: string;
   saved?: boolean;
-  tags?: string[];
+  tags: string[];
 }
 
 export interface TempNote {
@@ -16,7 +16,7 @@ export interface TempNote {
   content: string;
   followupQuestions: string[];
   followupAnswers: string[];
-  tags?: string[];
+  tags: string[];
 }
 
 interface NotesState {

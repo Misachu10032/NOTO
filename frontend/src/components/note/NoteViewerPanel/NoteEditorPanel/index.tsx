@@ -2,7 +2,7 @@ import { useNotes } from "@/app/hooks/useNotes";
 import NoteEditor from "./NoteEditor";
 import { TempNote } from "../../../../app/store/slices/notesSlice";
 
-export default function NoteEditorPanel( tempNote : TempNote) {
+export default function NoteEditorPanel(tempNote: TempNote) {
   const {
     setEditorVisible,
     updateTempNoteContent,
@@ -33,13 +33,13 @@ export default function NoteEditorPanel( tempNote : TempNote) {
         </button>
       </div>
       <div className="flex-1 min-h-0">
-<NoteEditor
-  keyword={tempNote.keyword}
-  content={tempNote.content}
-  tags={tempNote.tags}
-  onSave={({ keyword, content }) => handleSaveNote({ keyword, content })}
-  isSaving={false}
-/>
+        <NoteEditor
+          keyword={tempNote.keyword}
+          content={tempNote.content}
+          tags={tempNote.tags}
+          onSave={({ keyword, content, tags }) => handleSaveNote({ keyword, content, tags })}
+          isSaving={false}
+        />
       </div>
     </div>
   );

@@ -63,6 +63,7 @@ export function useNotes() {
         id: Date.now(), // temporary ID
         saved: false,
         created_at: new Date().toISOString(),
+        tags:[],
       };
       dispatch(addNote(newNote));
       dispatch(setSelectedNote(newNote));
@@ -81,34 +82,37 @@ export function useNotes() {
 const handleSaveNote = async ({
   keyword,
   content,
+  tags = [], 
 }: {
   keyword: string;
   content: string;
+  tags: string[]; // optional, can be undefined
 }) => {
   if (!selectedNote || !userId) return;
 
   try {
+    const payload = { keyword, content, tags, userId };
+    console.log("aaaaatagssss",tags)
     let response;
-
     if (selectedNote.saved) {
       // Update existing note
       response = await fetch(`/api/notes/${selectedNote.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword, content, userId }),
+        body: JSON.stringify(payload),
       });
     } else {
       // Create new note
       response = await fetch(`/api/notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword, content, userId }),
+        body: JSON.stringify(payload),
       });
     }
 
     if (!response.ok) throw new Error("Failed to save note");
-    const savedNote = await response.json();
 
+    const savedNote = await response.json();
     dispatch(syncNoteAfterSave({ oldId: selectedNote.id, savedNote }));
   } catch (err) {
     const errorMessage =
@@ -117,6 +121,7 @@ const handleSaveNote = async ({
     console.error(err);
   }
 };
+
 
 
   // -----------------------------
