@@ -7,6 +7,7 @@ export interface Note {
   created_at: string;
   updated_at?: string;
   saved?: boolean;
+  tags?: string[];
 }
 
 export interface TempNote {
@@ -15,6 +16,7 @@ export interface TempNote {
   content: string;
   followupQuestions: string[];
   followupAnswers: string[];
+  tags?: string[];
 }
 
 interface NotesState {
@@ -25,6 +27,7 @@ interface NotesState {
   isEditorVisible: boolean;
   isFollowUpMode: boolean;
   tempNotes: TempNote[];
+  selectedTag: string | null;
 }
 interface SyncNotePayload {
   oldId: number
@@ -39,6 +42,7 @@ const initialState: NotesState = {
   isEditorVisible: false,
   isFollowUpMode: false,
   tempNotes: [], // New tempNotes should include followupQuestions/Answers when created
+  selectedTag: null,
 };
 
 const notesSlice = createSlice({
@@ -161,12 +165,16 @@ const notesSlice = createSlice({
         note.id === oldId ? { ...note, ...savedNote, saved: true } : note
       );
     },
+    setSelectedTag: (state, action: PayloadAction<string | null>) => {
+      state.selectedTag = action.payload;
+    },
   },
 });
 
 export const {
   setNotes,
   setSelectedNote,
+  setSelectedTag,
   setLoading,
   setError,
   addNote,

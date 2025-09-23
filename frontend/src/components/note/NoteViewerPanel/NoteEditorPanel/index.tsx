@@ -1,5 +1,5 @@
 import { useNotes } from "@/app/hooks/useNotes";
-import NoteEditor from "@/components/Note/NoteViewerPanel/NoteEditorPanel/NoteEditor";
+import NoteEditor from "./NoteEditor";
 import { TempNote } from "../../../../app/store/slices/notesSlice";
 
 export default function NoteEditorPanel( tempNote : TempNote) {
@@ -36,6 +36,7 @@ export default function NoteEditorPanel( tempNote : TempNote) {
 <NoteEditor
   keyword={tempNote.keyword}
   content={tempNote.content}
+  tags={tempNote.tags}
   onSave={({ keyword, content }) => handleSaveNote({ keyword, content })}
   isSaving={false}
 />
