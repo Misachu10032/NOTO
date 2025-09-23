@@ -78,42 +78,46 @@ export function useNotes() {
   // -----------------------------
   // Save note (create or update)
   // -----------------------------
-  const handleSaveNote = async (content: string) => {
-    if (!selectedNote || !userId) return;
+const handleSaveNote = async ({
+  keyword,
+  content,
+}: {
+  keyword: string;
+  content: string;
+}) => {
+  if (!selectedNote || !userId) return;
 
-    try {
-      let response;
+  try {
+    let response;
 
-      if (selectedNote.saved) {
-        // Update existing note
-        response = await fetch(`/api/notes/${selectedNote.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content, userId }),
-        });
-      } else {
-        // Create new note
-        response = await fetch(`/api/notes`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            keyword: selectedNote.keyword,
-            content: selectedNote.content,
-            userId,
-          }),
-        });
-      }
-
-      if (!response.ok) throw new Error("Failed to save note");
-      const savedNote = await response.json();
-      dispatch(syncNoteAfterSave({ oldId: selectedNote.id, savedNote }));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      dispatch(setError(errorMessage));
-      console.error(err);
+    if (selectedNote.saved) {
+      // Update existing note
+      response = await fetch(`/api/notes/${selectedNote.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, content, userId }),
+      });
+    } else {
+      // Create new note
+      response = await fetch(`/api/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, content, userId }),
+      });
     }
-  };
+
+    if (!response.ok) throw new Error("Failed to save note");
+    const savedNote = await response.json();
+
+    dispatch(syncNoteAfterSave({ oldId: selectedNote.id, savedNote }));
+  } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : "An error occurred";
+    dispatch(setError(errorMessage));
+    console.error(err);
+  }
+};
+
 
   // -----------------------------
   // Return everything

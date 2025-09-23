@@ -48,17 +48,21 @@ def create_note():
 def update_note(note_id):
     """API endpoint to update an existing note"""
     data = request.json
+    keyword = data.get("keyword")
     content = data.get("content")
     user_id = data.get("userId")  # <-- must come from frontend
 
+    # Validate required fields
     if not content or not user_id:
         return jsonify({"error": "Content and userId are required"}), 400
 
-    updated_note = update_existing_note(note_id, user_id, content)
+    # Call your database function (needs to support keyword update)
+    updated_note = update_existing_note(note_id, user_id, content, keyword)
     if updated_note:
         return jsonify(updated_note)
 
     return jsonify({"error": "Note not found"}), 404
+
 
 
 # ----------------------------

@@ -33,14 +33,12 @@ export default function NoteEditorPanel( tempNote : TempNote) {
         </button>
       </div>
       <div className="flex-1 min-h-0">
-        <NoteEditor
-          content={tempNote.content}
-          onContentChange={(content) =>
-            updateTempNoteContent({ id: tempNote.id, content })
-          }
-          onSave={() => handleSaveNote(tempNote.content)}
-          isSaving={false}
-        />
+<NoteEditor
+  keyword={tempNote.keyword}
+  content={tempNote.content}
+  onSave={({ keyword, content }) => handleSaveNote({ keyword, content })}
+  isSaving={false}
+/>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ export interface Note {
   content: string;
   created_at: string;
   updated_at?: string;
-  saved?:boolean;
+  saved?: boolean;
 }
 
 export interface TempNote {
@@ -46,10 +46,13 @@ const notesSlice = createSlice({
   initialState,
   reducers: {
     setNotes: (state, action: PayloadAction<Note[]>) => {
-      state.notes = action.payload;
+      state.notes = action.payload.map(note => ({
+        ...note,
+        saved: true, // ✅ force saved to be true
+      }));
       state.isLoading = false;
       state.error = null;
-      console.log("sadsadasdaszzzzzzzzzzzzz", action.payload);
+      console.log("sadsadasdaszzzzzzzzzzzzz", state.notes);
     },
     setSelectedNote: (state, action: PayloadAction<Note>) => {
       const note = action.payload;
@@ -140,14 +143,13 @@ const notesSlice = createSlice({
     syncNoteAfterSave: (state, action: PayloadAction<SyncNotePayload>) => {
       const { oldId, savedNote } = action.payload;
 
-      // ✅ Update selectedNote
-      if (state.selectedNote?.id === oldId) {
-        state.selectedNote = {
-          ...state.selectedNote,
-          ...savedNote,
-          saved: true,
-        };
-      }
+
+      state.selectedNote = {
+        ...state.selectedNote,
+        ...savedNote,
+        saved: true,
+      };
+
 
       // ✅ Update notes array
       state.notes = state.notes.map((note) =>
