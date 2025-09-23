@@ -95,7 +95,7 @@ export default function NoteViewerPanel() {
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto">
-          <MarkdownViewer content={tempNote.content} />
+          <MarkdownViewer content={tempNote.content} tags={tempNote.tags}/>
         </div>
 
         {/* Follow-up Q&A section */}

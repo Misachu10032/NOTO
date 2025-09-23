@@ -27,7 +27,9 @@ interface NotesState {
   isEditorVisible: boolean;
   isFollowUpMode: boolean;
   tempNotes: TempNote[];
-  selectedTag: string | null;
+  allTags: string[];
+  selectedTags: string[];
+  filterMode: "AND" | "OR";
 }
 interface SyncNotePayload {
   oldId: number
@@ -42,7 +44,10 @@ const initialState: NotesState = {
   isEditorVisible: false,
   isFollowUpMode: false,
   tempNotes: [], // New tempNotes should include followupQuestions/Answers when created
-  selectedTag: null,
+  allTags: [],
+  selectedTags: [],
+  filterMode: "OR",
+
 };
 
 const notesSlice = createSlice({
@@ -57,6 +62,12 @@ const notesSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       console.log("sadsadasdaszzzzzzzzzzzzz", state.notes);
+      const tags = new Set<string>();
+      action.payload.forEach((note) => {
+        note.tags?.forEach((tag) => tags.add(tag));
+      });
+      state.allTags = Array.from(tags);
+     
     },
     setSelectedNote: (state, action: PayloadAction<Note>) => {
       const note = action.payload;
@@ -165,16 +176,20 @@ const notesSlice = createSlice({
         note.id === oldId ? { ...note, ...savedNote, saved: true } : note
       );
     },
-    setSelectedTag: (state, action: PayloadAction<string | null>) => {
-      state.selectedTag = action.payload;
+    setSelectedTags: (state, action: PayloadAction<string[]>) => {
+      state.selectedTags = action.payload;
+    },
+        setFilterMode(state, action: PayloadAction<"AND" | "OR">) {
+      state.filterMode = action.payload;
     },
   },
 });
 
 export const {
+  setFilterMode,
   setNotes,
   setSelectedNote,
-  setSelectedTag,
+  setSelectedTags,
   setLoading,
   setError,
   addNote,

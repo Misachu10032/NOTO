@@ -9,6 +9,7 @@ from config import POSTGRES_URI
 # Database Connection
 # -----------------------------
 
+
 @contextmanager
 def get_db_connection():
     conn = psycopg2.connect(POSTGRES_URI)
@@ -22,6 +23,7 @@ def get_db_connection():
 # -----------------------------
 # Notes CRUD
 # -----------------------------
+
 
 def get_all_notes(user_id: Optional[int] = None) -> List[Dict[str, Any]]:
     """Fetch all notes, optionally filtered by user_id, including their tags."""
@@ -71,8 +73,12 @@ def get_all_notes(user_id: Optional[int] = None) -> List[Dict[str, Any]]:
                     "id": row["id"],
                     "keyword": row["keyword"],
                     "content": row["content"],
-                    "created_at": row["created_at"].isoformat() if row["created_at"] else None,
-                    "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None,
+                    "created_at": (
+                        row["created_at"].isoformat() if row["created_at"] else None
+                    ),
+                    "updated_at": (
+                        row["updated_at"].isoformat() if row["updated_at"] else None
+                    ),
                     "tags": row["tags"] or [],
                 }
                 for row in rows
@@ -181,7 +187,8 @@ def update_existing_note(
                 # Prepare bulk insert values
                 values = [(note_id, tag, now, user_id) for tag in tags]
                 args_str = ",".join(
-                    cur.mogrify("(%s, %s, %s, %s)", val).decode("utf-8") for val in values
+                    cur.mogrify("(%s, %s, %s, %s)", val).decode("utf-8")
+                    for val in values
                 )
                 cur.execute(
                     f"""
@@ -224,26 +231,41 @@ def delete_note_by_id(note_id: int, user_id: int) -> bool:
 
 
 def get_notes_by_user(user_id: int) -> List[Dict[str, Any]]:
-    """Fetch all notes for a specific user."""
+    """Fetch all notes for a specific user, including their tags."""
     with get_db_connection() as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(
                 """
-                SELECT id, keyword, content, created_at, updated_at
-                FROM notes
-                WHERE user_id = %s
-                ORDER BY created_at DESC
+                SELECT
+                    n.id,
+                    n.keyword,
+                    n.content,
+                    n.created_at,
+                    n.updated_at,
+                    COALESCE(json_agg(nt.tag) FILTER (WHERE nt.tag IS NOT NULL), '[]') AS tags
+                FROM notes n
+                LEFT JOIN note_tags nt ON n.id = nt.note_id
+                WHERE n.user_id = %s
+                GROUP BY n.id, n.keyword, n.content, n.created_at, n.updated_at
+                ORDER BY n.created_at DESC
                 """,
                 (user_id,),
             )
             rows = cur.fetchall()
+
+            # RealDictCursor already gives dict rows
             return [
                 {
-                    "id": row[0],
-                    "keyword": row[1],
-                    "content": row[2],
-                    "created_at": row[3].isoformat() if row[3] else None,
-                    "updated_at": row[4].isoformat() if row[4] else None,
+                    "id": row["id"],
+                    "keyword": row["keyword"],
+                    "content": row["content"],
+                    "created_at": (
+                        row["created_at"].isoformat() if row["created_at"] else None
+                    ),
+                    "updated_at": (
+                        row["updated_at"].isoformat() if row["updated_at"] else None
+                    ),
+                    "tags": row["tags"],  # This will be a Python list from json_agg
                 }
                 for row in rows
             ]
