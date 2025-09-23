@@ -41,14 +41,14 @@ export default function NoteSummary() {
         <ul className="space-y-2">
           {notes.map((note: Note) => (
             <li
-              key={note.id ?? note.keyword} // fallback key if id is missing
+              key={note.id } // fallback key if id is missing
               onClick={() => dispatch(setSelectedNote(note))}
               className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${
                 selectedNote?.id === note.id
                   ? "bg-blue-50 border border-blue-200" // selected note → always blue
-                  : note.id
-                  ? "bg-green-50 border border-green-200" // has id → green
-                  : "hover:bg-gray-50" // no id → default hover
+                  : note.saved
+                  ? "bg-gray-50 border border-gray-200" 
+                  : "bg-yellow-50 border border-yellow-200" 
               }`}
             >
               <span className="truncate">{note.keyword}</span>

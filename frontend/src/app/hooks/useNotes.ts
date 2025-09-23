@@ -1,14 +1,15 @@
+"use client";
+
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   setNotes,
   setLoading,
   setError,
   addNote,
-  updateNote,
   setSelectedNote,
   setEditorVisible,
-  setFollowUpMode,
   setTempNotes,
   updateTempNoteContent,
   addTempNoteFollowUpQuestion,
@@ -20,24 +21,24 @@ import {
 
 export function useNotes() {
   const dispatch = useAppDispatch();
-  const {
-    notes,
-    selectedNote,
-    isLoading,
-    isEditorVisible,
-    isFollowUpMode,
-    tempNotes,
-  } = useAppSelector((state) => state.notes);
+  const { data: session } = useSession();
+  const userId = session?.user?.userId;
+
+  const { notes, selectedNote, isLoading, isEditorVisible, tempNotes } =
+    useAppSelector((state) => state.notes);
 
   const tempNote =
     tempNotes.length > 0 ? tempNotes[0] : { id: "", keyword: "", content: "" };
 
-  // Fetch notes on mount
-
+  // -----------------------------
+  // Fetch notes
+  // -----------------------------
   const fetchNotes = async () => {
+    if (!userId) return; // skip if not signed in
     dispatch(setLoading(true));
+
     try {
-      const response = await fetch("http://localhost:5000/api/notes");
+      const response = await fetch(`/api/notes?userId=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch notes");
       const data = await response.json();
       dispatch(setNotes(data));
@@ -51,14 +52,17 @@ export function useNotes() {
     }
   };
 
+  // -----------------------------
+  // Generate temporary note
+  // -----------------------------
   const handleNoteGenerated = async (keyword: string, content: string) => {
     try {
       const newNote = {
         keyword,
         content,
-        id: Date.now(), // TODO:make this better
+        id: Date.now(), // temporary ID
         saved: false,
-        created_at: new Date().toISOString(), // assign current timestamp
+        created_at: new Date().toISOString(),
       };
       dispatch(addNote(newNote));
       dispatch(setSelectedNote(newNote));
@@ -71,60 +75,62 @@ export function useNotes() {
     }
   };
 
-  const handleSaveNote = async (content: string) => {
-    if (!selectedNote) return;
+  // -----------------------------
+  // Save note (create or update)
+  // -----------------------------
+const handleSaveNote = async ({
+  keyword,
+  content,
+}: {
+  keyword: string;
+  content: string;
+}) => {
+  if (!selectedNote || !userId) return;
 
-    try {
-      let response;
+  try {
+    let response;
 
-      if (selectedNote.saved) {
-        // 🟢 Update existing note
-        response = await fetch(
-          `http://localhost:5000/api/notes/${selectedNote.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content }),
-          }
-        );
-      } else {
-        // 🟢 Create a new note
-        response = await fetch(`http://localhost:5000/api/notes`, {
-          // removed trailing slash (optional but cleaner)
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            keyword: selectedNote.keyword,
-            content:selectedNote.content,
-          }),
-        });
-      }
-
-      if (!response.ok) throw new Error("Failed to save note");
-      const savedNote = await response.json();
-
-      dispatch(syncNoteAfterSave({ oldId: selectedNote.id, savedNote }));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      dispatch(setError(errorMessage));
-      console.error(err);
+    if (selectedNote.saved) {
+      // Update existing note
+      response = await fetch(`/api/notes/${selectedNote.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, content, userId }),
+      });
+    } else {
+      // Create new note
+      response = await fetch(`/api/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, content, userId }),
+      });
     }
-  };
 
-  // Reset editor visibility when a new note is selected
+    if (!response.ok) throw new Error("Failed to save note");
+    const savedNote = await response.json();
 
+    dispatch(syncNoteAfterSave({ oldId: selectedNote.id, savedNote }));
+  } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : "An error occurred";
+    dispatch(setError(errorMessage));
+    console.error(err);
+  }
+};
+
+
+  // -----------------------------
+  // Return everything
+  // -----------------------------
   return {
     notes,
     selectedNote,
     isLoading,
     isEditorVisible,
-    isFollowUpMode,
     tempNotes,
     tempNote,
     addTempNote,
     fetchNotes,
-
     handleNoteGenerated,
     handleSaveNote,
     setTempNotes: (notes: TempNote[] | any) => dispatch(setTempNotes(notes)),
@@ -132,7 +138,6 @@ export function useNotes() {
     setEditorVisible: (visible: boolean) => dispatch(setEditorVisible(visible)),
     updateTempNoteContent: (payload: any) =>
       dispatch(updateTempNoteContent(payload)),
-    setFollowUpMode: (val: boolean) => dispatch(setFollowUpMode(val)),
     addTempNoteFollowUpQuestion: (payload: {
       id: string | number;
       followupQuestion: string;

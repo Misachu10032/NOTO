@@ -3,4 +3,5 @@ from models.note_sql import (
     create_new_note,
     update_existing_note,
     delete_note_by_id,
+    get_notes_by_user
 )

@@ -9,8 +9,6 @@ export default function NoteViewerPanel() {
     tempNotes,
     isEditorVisible,
     setEditorVisible,
-    setFollowUpMode,
-    isFollowUpMode,
     addTempNoteFollowUpQuestion,
     addTempNoteFollowUpAnswer,
   } = useNotes();
@@ -73,7 +71,6 @@ export default function NoteViewerPanel() {
     }
   };
 
-  const toggleFollowUpMode = () => setFollowUpMode(!isFollowUpMode);
 
   useEffect(() => {
     console.log("isEditorVisible changed:", isEditorVisible);
@@ -93,12 +90,7 @@ export default function NoteViewerPanel() {
             >
               Edit
             </button>
-            <button
-              onClick={toggleFollowUpMode}
-              className="px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
-            >
-              Ask Follow-up
-            </button>
+      
           </div>
         </div>
 
