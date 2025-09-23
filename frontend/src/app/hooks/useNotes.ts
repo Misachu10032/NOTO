@@ -48,6 +48,7 @@ export function useNotes() {
         const response = await fetch(`/api/notes?userId=${userId}`);
         if (!response.ok) throw new Error("Failed to fetch notes");
         const data = await response.json();
+        console.log("when i called")
         dispatch(setNotes(data));
       } catch (err) {
         const errorMessage =

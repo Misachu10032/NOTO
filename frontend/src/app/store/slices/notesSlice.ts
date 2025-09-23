@@ -67,7 +67,7 @@ const notesSlice = createSlice({
         note.tags?.forEach((tag) => tags.add(tag));
       });
       state.allTags = Array.from(tags);
-     
+
     },
     setSelectedNote: (state, action: PayloadAction<Note>) => {
       const note = action.payload;
@@ -175,11 +175,16 @@ const notesSlice = createSlice({
       state.tempNotes = state.tempNotes.map((note) =>
         note.id === oldId ? { ...note, ...savedNote, saved: true } : note
       );
+      const tags = new Set<string>();
+      state.notes.forEach((note) => {
+        note.tags?.forEach((tag) => tags.add(tag));
+      });
+      state.allTags = Array.from(tags);
     },
     setSelectedTags: (state, action: PayloadAction<string[]>) => {
       state.selectedTags = action.payload;
     },
-        setFilterMode(state, action: PayloadAction<"AND" | "OR">) {
+    setFilterMode(state, action: PayloadAction<"AND" | "OR">) {
       state.filterMode = action.payload;
     },
   },
